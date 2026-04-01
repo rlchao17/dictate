@@ -1,0 +1,11 @@
+#input {
+  display: block;
+}
+
+#dictating {
+  display: none;
+}
+
+#dictateWord {
+  width: 400px;
+}
