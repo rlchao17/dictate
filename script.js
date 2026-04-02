@@ -1,26 +1,38 @@
+// no more getElementById after this
+
+const ESelectLang = document.getElementById("selectLang");
+const EInit = document.getElementById("init");
+const EWordListInput = document.getElementById("wordListInput");
+const EAfterInit = document.getElementById("afterInit");
+const EDictateInput = document.getElementById("dictateInput");
+const EIncorrect = document.getElementById("incorrect");
+const ECorrect = document.getElementById("correct");
+const EShowCorrect = document.getElementById("showCorrect");
+const EShowWrong = document.getElementById("showWrong");
+
 // tools
 
 function sleep(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+function formatWord(word) {
+  return word.trim()
+             .replace(/\s+/g, ' ');
+}
+
+function formatToCompare(word) {
+  return formatWord(word).toLowerCase()
+                         .replace(/[^\w\s]/g, ".");
+}
+
+function getLang() {
+  return ESelectLang.value;
 }
 
 function hideAndShow() {
-  document.getElementById("input").style.display = "none";
-  document.getElementById("dictating").style.display = "block";
-}
-
-
-function getLang() {
-  var select = document.getElementById("selectLang");
-  return select.value;
-}
-
-function getDictated() {
-  return document.getElementById("dictateWord").value.trim();
-}
-
-function clearDictated() {
-  document.getElementById("dictateWord").value = "";
+  EInit.style.display = "none";
+  EAfterInit.style.display = "block";
 }
 
 function waitForCheck() {
@@ -32,12 +44,49 @@ function waitForCheck() {
   });
 }
 
+function getDictated() {
+  var dictated = EDictateInput.value;
+  return formatWord(dictated);
+}
+
+function clearDictated() {
+  EDictateInput.value = "";
+}
+
+function showCorrect() {
+  EIncorrect.style.display = "none";
+  ECorrect.style.display = "block";
+}
+
+function showIncorrect(original, dictated) {
+  ECorrect.style.display = "none";
+  EIncorrect.style.display = "block";
+  EShowCorrect.textContent = original;
+  EShowWrong.textContent = dictated;
+}
+
+
 // main
 
+function playTTS(text, lang) {
+  // Get the audio element
+  var audioEl = document.getElementById("tts-audio");
+
+  var url = `https://tts-api.netlify.app/?text=${text}&lang=${lang}`;
+  // Backup API
+  // var url = `https://translate.google.com/translate_tts?ie=UTF-8&tl=${lang}&client=tw-ob&q=${text}`;
+
+  // add the sound to the audio element
+  audioEl.src = url;
+
+  // For auto playing the sound
+  audioEl.play();
+}
+
 function readWordList() {
-  var input = document.getElementById("inputWordList").value;
+  var input = EWordListInput.value;
   var wordList = input.split("\n")
-                      .map(line => line.trim())
+                      .map(formatWord)
                       .filter(line => line !== "");
   var emptyErrorMsg = "Input cannot be empty";
 
@@ -49,60 +98,40 @@ function readWordList() {
   }
 }
 
-
 async function startDictating() {
   hideAndShow();
   
   var wordList = readWordList();
-  var showResult = document.getElementById('result');
   
   for (var word of wordList) {
-    clearDictated();
-    playTTS(word, getLang())
+    playTTS(word, getLang());
     
     // wait for check button
     await waitForCheck();
     
-    result = reallyCheck(word, getDictated());
+    var dictated = getDictated();
     
-    // show result text
-    showResult.innerHTML = result[1];
+    // clear so that they see it's being checked
+    clearDictated();
     
-    // wait longer if wrong
-    if (result[0] === false) {
+    if (reallyCheck(word, dictated) === true) {
+      showCorrect();
+    } else {
+      showIncorrect(word, dictated);
+      
+      // wait so they see why
       await sleep(3000);
     }
   }
 }
 
 function reallyCheck(original, dictated) {
-  o = original.toLowerCase().replace(/[^\w\s]|_/g, ".");
-  d = dictated.toLowerCase().replace(/[^\w\s]|_/g, ".");
+  o = formatToCompare(original);
+  d = formatToCompare(dictated);
   
   if (o === d) {
-    return [true, "<p style='color: green;'>Correct</p>"]
+    return true;
   } else {
-    return [false, `<p>
-<span style='color: red;'>Incorrect</span>
-, it is 
-<span style='color: green;'>${original}</span>
-, not 
-<span style='color: red;'>${dictated}</span>
-</p>`]
+    return false;
   }
 }
-
-function playTTS(text, lang) {
-  // Get the audio element
-  var audioEl = document.getElementById('tts-audio');
-
-  var url = `https://tts-api.netlify.app/?text=${text}&lang=${lang}`;
-  // Backup API
-  // var url = `https://translate.google.com/translate_tts?ie=UTF-8&tl=${lang}&client=tw-ob&q=${text}`;
-
-  // add the sound to the audio element
-  audioEl.src = url;
-
-  // For auto playing the sound
-  audioEl.play();
-};

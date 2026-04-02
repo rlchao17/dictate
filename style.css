@@ -1,11 +1,36 @@
-#input {
+#body {
+  background: lemonchiffon;
+}
+
+#init {
   display: block;
 }
 
-#dictating {
+#wordListInput {
+  width: 66%;
+  height: 100px;
+}
+
+#afterInit {
   display: none;
 }
 
-#dictateWord {
-  width: 400px;
+#dictateInput {
+  width: 66%;
+}
+
+#correct {
+  display: none;
+}
+
+#incorrect {
+  display: none;
+}
+
+.incorrectColor {
+  color: red;
+}
+
+.correctColor {
+  color: green;
 }

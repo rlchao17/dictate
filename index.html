@@ -3,41 +3,47 @@
   <head>
     <meta charset="utf-8" />
     <title>Dictate</title>
-    <script src="script.js"></script>
+    <script src="script.js" defer></script>
     <link rel="stylesheet" href="style.css">
   </head>
-  <body>
+  <body id="body">
     <h3>Dictate</h3>
+    <!-- Restart -->
     <button onclick="location.reload()">Restart</button>
     <!-- Select Language -->
     <select id="selectLang">
       <option value="sv" selected>Svenska</option>
       <option value="en">English</option>
-      <option value="zh-CN">Chinese</option>
+      <option value="zh-CN">简体中文</option>
     </select>
     <br><br>
     <!-- Input Word List -->
-    <div id="input">
-      <textarea id="inputWordList"
-                rows="7" 
-                cols="30" 
+    <div id="init">
+      <textarea id="wordListInput"
                 placeholder="Input word list"></textarea>
-      <button id="startDictating"
-              onclick="startDictating()">Start</button>
+      <br><br>
+      <button onclick="startDictating()">Start</button>
     </div>
     <!-- Start Dictating! -->
-    <div id="dictating">
+    <div id="afterInit">
       <audio controls id="tts-audio"></audio>
       <br><br>
-      <input id="dictateWord"
+      <input id="dictateInput"
              type="text"
              placeholder="Input what you heard"
              onkeydown="if(event.key==='Enter'){checkWord()}">
-      <button id="checkWord"
-              onclick="checkWord()">Check</button>
+      <button onclick="checkWord()">Check</button>
       <br>
-      <div id="result">
-        <p>Listen to the audio</p>
+      <!-- Result -->
+      <div>
+        <div id="correct">
+          <p class="correctColor">Correct</p>
+        </div>
+        <div id="incorrect">
+          <p class="incorrectColor">Incorrect:</p>
+          <div id="showCorrect" class="correctColor"></div>
+          <div id="showWrong" class="incorrectColor"></div>
+        </div>
       </div>
     </div>
   </body>
