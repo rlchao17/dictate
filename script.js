@@ -1,16 +1,8 @@
-// no more getElementById after this
-
-const ESelectLang = document.getElementById("selectLang");
-const EInit = document.getElementById("init");
-const EWordListInput = document.getElementById("wordListInput");
-const EAfterInit = document.getElementById("afterInit");
-const EDictateInput = document.getElementById("dictateInput");
-const EIncorrect = document.getElementById("incorrect");
-const ECorrect = document.getElementById("correct");
-const EShowCorrect = document.getElementById("showCorrect");
-const EShowWrong = document.getElementById("showWrong");
-
 // tools
+
+function getEl(id) {
+  return document.getElementById(id);
+}
 
 function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
@@ -27,12 +19,12 @@ function formatToCompare(word) {
 }
 
 function getLang() {
-  return ESelectLang.value;
+  return getEl("selectLang").value;
 }
 
 function hideAndShow() {
-  EInit.style.display = "none";
-  EAfterInit.style.display = "block";
+  getEl("init").style.display = "none";
+  getEl("afterInit").style.display = "block";
 }
 
 function waitForCheck() {
@@ -45,24 +37,24 @@ function waitForCheck() {
 }
 
 function getDictated() {
-  var dictated = EDictateInput.value;
+  var dictated = getEl("dictateInput").value;
   return formatWord(dictated);
 }
 
 function clearDictated() {
-  EDictateInput.value = "";
+  getEl("dictateInput").value = "";
 }
 
 function showCorrect() {
-  EIncorrect.style.display = "none";
-  ECorrect.style.display = "block";
+  getEl("incorrect").style.display = "none";
+  getEl("correct").style.display = "block";
 }
 
 function showIncorrect(original, dictated) {
-  ECorrect.style.display = "none";
-  EIncorrect.style.display = "block";
-  EShowCorrect.textContent = original;
-  EShowWrong.textContent = dictated;
+  getEl("correct").style.display = "none";
+  getEl("incorrect").style.display = "block";
+  getEl("showCorrect").textContent = original;
+  getEl("showWrong").textContent = dictated;
 }
 
 
@@ -70,7 +62,7 @@ function showIncorrect(original, dictated) {
 
 function playTTS(text, lang) {
   // Get the audio element
-  var audioEl = document.getElementById("tts-audio");
+  var audioEl = getEl("tts-audio");
 
   var url = `https://tts-api.netlify.app/?text=${text}&lang=${lang}`;
   // Backup API
@@ -84,7 +76,7 @@ function playTTS(text, lang) {
 }
 
 function readWordList() {
-  var input = EWordListInput.value;
+  var input = getEl("wordListInput").value;
   var wordList = input.split("\n")
                       .map(formatWord)
                       .filter(line => line !== "");
