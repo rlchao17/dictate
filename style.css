@@ -27,6 +27,10 @@
   display: none;
 }
 
+#finalResult {
+  display: none;
+}
+
 .incorrectColor {
   color: red;
 }

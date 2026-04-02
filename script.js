@@ -8,6 +8,14 @@ function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
+function showID(id) {
+  getEl(id).style.display = "block";
+}
+
+function hideID(id) {
+  getEl(id).style.display = "none";
+}
+
 function formatWord(word) {
   return word.trim()
              .replace(/\s+/g, ' ');
@@ -22,9 +30,9 @@ function getLang() {
   return getEl("selectLang").value;
 }
 
-function hideAndShow() {
-  getEl("init").style.display = "none";
-  getEl("afterInit").style.display = "block";
+function showAfterInit() {
+  hideID("init");
+  showID("afterInit");
 }
 
 function waitForCheck() {
@@ -46,17 +54,16 @@ function clearDictated() {
 }
 
 function showCorrect() {
-  getEl("incorrect").style.display = "none";
-  getEl("correct").style.display = "block";
+  hideID("incorrect");
+  showID("correct");
 }
 
 function showIncorrect(original, dictated) {
-  getEl("correct").style.display = "none";
-  getEl("incorrect").style.display = "block";
+  hideID("correct");
+  showID("incorrect");
   getEl("showCorrect").textContent = original;
   getEl("showWrong").textContent = dictated;
 }
-
 
 // main
 
@@ -90,33 +97,6 @@ function readWordList() {
   }
 }
 
-async function startDictating() {
-  hideAndShow();
-  
-  var wordList = readWordList();
-  
-  for (var word of wordList) {
-    playTTS(word, getLang());
-    
-    // wait for check button
-    await waitForCheck();
-    
-    var dictated = getDictated();
-    
-    // clear so that they see it's being checked
-    clearDictated();
-    
-    if (reallyCheck(word, dictated) === true) {
-      showCorrect();
-    } else {
-      showIncorrect(word, dictated);
-      
-      // wait so they see why
-      await sleep(3000);
-    }
-  }
-}
-
 function reallyCheck(original, dictated) {
   o = formatToCompare(original);
   d = formatToCompare(dictated);
@@ -125,5 +105,72 @@ function reallyCheck(original, dictated) {
     return true;
   } else {
     return false;
+  }
+}
+
+async function startDictating() {
+  showAfterInit();
+  
+  var wordList = readWordList();
+  var dictatedList = [];
+  var isCorrectList = [];
+  
+  for (var word of wordList) {
+    playTTS(word, getLang());
+    
+    // wait for check button
+    await waitForCheck();
+    
+    // get results
+    var dictated = getDictated();
+    var isCorrect = reallyCheck(word, dictated);
+        
+    // save results
+    dictatedList.push(dictated);
+    isCorrectList.push(isCorrect);
+    
+    // clear so they see it's being checked
+    clearDictated();
+    
+    if (isCorrect === true) {
+      showCorrect();
+      
+      await sleep(1000);
+    } else {
+      showIncorrect(word, dictated);
+      
+      // wait longer
+      await sleep(3000);
+    }
+  }
+  
+  showFinalResult(wordList, dictatedList, isCorrectList);
+}
+
+function showFinalResult(wordList, dictatedList, isCorrectList) {
+  hideID("afterInit");
+  showID("finalResult");
+  
+  var table = getEl("finalResultTable");
+  
+  for (i = 0; i < wordList.length; i++) {
+    
+    // new row
+    var newRow = table.insertRow();
+    var original = newRow.insertCell(0);
+    var dictated = newRow.insertCell(1);
+    
+    // colors
+    original.classList.add("correctColor");
+    
+    if (isCorrectList[i] === true) {
+      dictated.classList.add("correctColor");
+    } else {
+      dictated.classList.add("incorrectColor");
+    }
+    
+    // show results
+    original.innerText = wordList[i];
+    dictated.innerText = dictatedList[i];
   }
 }
