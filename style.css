@@ -1,40 +1,51 @@
-#body {
+* {
+  box-sizing: border-box;
+}
+
+body {
   background: lemonchiffon;
 }
 
-#init {
-  display: block;
+table, th, td {
+  border: 1px solid black;
+  border-collapse: collapse;
+  padding: 5px;
+  text-align: center;
+  overflow-wrap: break-word;
 }
 
-#wordListInput {
-  width: 66%;
-  height: 100px;
+th {
+  font-weight: normal;
 }
 
-#afterInit {
-  display: none;
+#div-init {}
+
+#input-word-list {
+  width: 100%;
+  height: 45vh;
+  padding: 5px;
 }
 
-#dictateInput {
-  width: 66%;
+#div-dictate {}
+
+#input-dictate {
+  width: 88%;
 }
 
-#correct {
-  display: none;
+#div-incorrect {}
+
+#div-correct {}
+
+#div-final-result {}
+
+#table-final-result {
+  min-width: 45%;
 }
 
-#incorrect {
-  display: none;
-}
-
-#finalResult {
-  display: none;
-}
-
-.incorrectColor {
+.incorrect-color {
   color: red;
 }
 
-.correctColor {
+.correct-color {
   color: green;
 }

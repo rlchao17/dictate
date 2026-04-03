@@ -6,49 +6,59 @@
     <script src="script.js" defer></script>
     <link rel="stylesheet" href="style.css">
   </head>
-  <body id="body">
-    <h2>Dictate</h2>
+  <body>
+    <h3>Dictate!</h3>
     <!-- Restart -->
     <button onclick="location.reload()">Restart</button>
     <!-- Select Language -->
-    <select id="selectLang">
+    <select id="select-lang">
       <option value="sv" selected>Svenska</option>
       <option value="en">English</option>
       <option value="zh-CN">简体中文</option>
     </select>
     <br><br>
     <!-- Input Word List -->
-    <div id="init">
-      <textarea id="wordListInput"
+    <div id="div-init">
+      <textarea id="input-word-list"
                 placeholder="Input word list"></textarea>
       <br><br>
-      <button onclick="startDictating()">Start</button>
+      <button onclick="startDictate()">Start</button>
     </div>
     <!-- Start Dictating! -->
-    <div id="afterInit">
+    <div id="div-dictate"
+         style="display: none;">
       <audio controls id="tts-audio"></audio>
       <br><br>
-      <input id="dictateInput"
-             type="text"
+      <input id="input-dictate"
              placeholder="Input what you heard"
-             onkeydown="if(event.key==='Enter'){checkWord()}">
-      <button onclick="checkWord()">Check</button>
+             onkeydown="if(event.key==='Enter'){checkDictated()}"
+             onblur="setTimeout(() => this.focus(), 0)">
+      <button onclick="checkDictated()">Check</button>
       <br>
       <!-- Result -->
       <div>
-        <div id="correct">
-          <p class="correctColor">Correct</p>
+        <div id="div-correct"
+             class="correct-color"
+             style="display: none;">
+          <p>Correct</p>
         </div>
-        <div id="incorrect">
-          <p class="incorrectColor">Incorrect:</p>
-          <div id="showCorrect" class="correctColor"></div>
-          <div id="showWrong" class="incorrectColor"></div>
+        <div id="div-incorrect"
+             class="incorrect-color"
+             style="display: none;">
+          <p>Incorrect:</p>
+          <table>
+            <tr><td id="td-correct" 
+                    class="correct-color">Original</td></tr>
+            <tr><td id="td-incorrect" 
+                    class="incorrect-color">Dictated</td></tr>
+          </table>
         </div>
       </div>
     </div>
     <!-- Final Result -->
-    <div id="finalResult">
-      <table id="finalResultTable" border="1">
+    <div id="div-final-result"
+         style="display: none;">
+      <table id="table-final-result">
         <tr>
           <th>Original</th>
           <th>Dictated</th>

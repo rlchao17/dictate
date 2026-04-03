@@ -1,4 +1,4 @@
-// tools
+// tool functions
 
 function getEl(id) {
   return document.getElementById(id);
@@ -16,88 +16,25 @@ function hideID(id) {
   getEl(id).style.display = "none";
 }
 
+function splitWordList(str) {
+  return str.split("\n")
+            .map(formatWord)
+            .filter(line => line !== "");
+}
+
 function formatWord(word) {
-  return word.trim()
-             .replace(/\s+/g, ' ');
+  return word.replace(/\s+/g, ' ')
+             .trim();
 }
 
 function formatToCompare(word) {
-  return formatWord(word).toLowerCase()
-                         .replace(/[^\w\s]/g, ".");
+  return word.replace(/[^\w\s]/g, "")
+             .trim()
+             .replace(/\s+/g, ' ')
+             .toLowerCase();
 }
 
-function getLang() {
-  return getEl("selectLang").value;
-}
-
-function showAfterInit() {
-  hideID("init");
-  showID("afterInit");
-}
-
-function waitForCheck() {
-  // This thing is so annoying!
-  return new Promise(resolve => {
-    window.checkWord = () => {
-      resolve();
-    };
-  });
-}
-
-function getDictated() {
-  var dictated = getEl("dictateInput").value;
-  return formatWord(dictated);
-}
-
-function clearDictated() {
-  getEl("dictateInput").value = "";
-}
-
-function showCorrect() {
-  hideID("incorrect");
-  showID("correct");
-}
-
-function showIncorrect(original, dictated) {
-  hideID("correct");
-  showID("incorrect");
-  getEl("showCorrect").textContent = original;
-  getEl("showWrong").textContent = dictated;
-}
-
-// main
-
-function playTTS(text, lang) {
-  // Get the audio element
-  var audioEl = getEl("tts-audio");
-
-  var url = `https://tts-api.netlify.app/?text=${text}&lang=${lang}`;
-  // Backup API
-  // var url = `https://translate.google.com/translate_tts?ie=UTF-8&tl=${lang}&client=tw-ob&q=${text}`;
-
-  // add the sound to the audio element
-  audioEl.src = url;
-
-  // For auto playing the sound
-  audioEl.play();
-}
-
-function readWordList() {
-  var input = getEl("wordListInput").value;
-  var wordList = input.split("\n")
-                      .map(formatWord)
-                      .filter(line => line !== "");
-  var emptyErrorMsg = "Input cannot be empty";
-
-  if (wordList.length === 0) {
-    alert(emptyErrorMsg);
-    throw new Error(emptyErrorMsg);
-  } else {
-    return wordList;
-  }
-}
-
-function reallyCheck(original, dictated) {
+function compareWord(original, dictated) {
   o = formatToCompare(original);
   d = formatToCompare(dictated);
   
@@ -108,10 +45,84 @@ function reallyCheck(original, dictated) {
   }
 }
 
-async function startDictating() {
-  showAfterInit();
+// short functions
+
+function getLang() {
+  return getEl("select-lang").value;
+}
+
+function hideAndShow() {
+  hideID("div-init");
+  showID("div-dictate");
+}
+
+function hideAndShow2() {
+  hideID("div-dictate");
+  showID("div-final-result");
+}
+
+function waitForCheck() {
+  // This thing is so annoying!
+  return new Promise(resolve => {
+    window.checkDictated = () => {
+      resolve();
+    };
+  });
+}
+
+function getDictated() {
+  var dictated = getEl("input-dictate").value;
+  return formatWord(dictated);
+}
+
+function clearDictated() {
+  getEl("input-dictate").value = "";
+}
+
+function showCorrect() {
+  hideID("div-incorrect");
+  showID("div-correct");
+}
+
+function showIncorrect(original, dictated) {
+  hideID("div-correct");
+  showID("div-incorrect");
+  getEl("td-correct").textContent = original;
+  getEl("td-incorrect").textContent = dictated;
+}
+
+// main
+
+function playTTS(text, lang) {
+  var audioEl = getEl("tts-audio");
+
+  var url = `https://tts-api.netlify.app/?text=${text}&lang=${lang}`;
+  // Backup API
+  // var url = `https://translate.google.com/translate_tts?ie=UTF-8&tl=${lang}&client=tw-ob&q=${text}`;
+
+  audioEl.src = url;
+  audioEl.play();
+}
+
+function readWordList() {
+  var input = getEl("input-word-list").value;
+  var wordList = splitWordList(input);
+  var emptyErrorMsg = "Input cannot be empty";
+
+  if (wordList.length === 0) {
+    alert(emptyErrorMsg);
+    throw new Error(emptyErrorMsg);
+  } else {
+    return wordList;
+  }
+}
+
+async function startDictate() {
   
   var wordList = readWordList();
+  
+  hideAndShow();
+  
   var dictatedList = [];
   var isCorrectList = [];
   
@@ -123,7 +134,7 @@ async function startDictating() {
     
     // get results
     var dictated = getDictated();
-    var isCorrect = reallyCheck(word, dictated);
+    var isCorrect = compareWord(word, dictated);
         
     // save results
     dictatedList.push(dictated);
@@ -144,14 +155,12 @@ async function startDictating() {
     }
   }
   
-  showFinalResult(wordList, dictatedList, isCorrectList);
+  finalResult(wordList, dictatedList, isCorrectList);
 }
 
-function showFinalResult(wordList, dictatedList, isCorrectList) {
-  hideID("afterInit");
-  showID("finalResult");
+function finalResult(wordList, dictatedList, isCorrectList) {
   
-  var table = getEl("finalResultTable");
+  var table = getEl("table-final-result");
   
   for (i = 0; i < wordList.length; i++) {
     
@@ -161,16 +170,18 @@ function showFinalResult(wordList, dictatedList, isCorrectList) {
     var dictated = newRow.insertCell(1);
     
     // colors
-    original.classList.add("correctColor");
+    original.classList.add("correct-color");
     
     if (isCorrectList[i] === true) {
-      dictated.classList.add("correctColor");
+      dictated.classList.add("correct-color");
     } else {
-      dictated.classList.add("incorrectColor");
+      dictated.classList.add("incorrect-color");
     }
     
     // show results
     original.innerText = wordList[i];
     dictated.innerText = dictatedList[i];
   }
+  
+  hideAndShow2();
 }
